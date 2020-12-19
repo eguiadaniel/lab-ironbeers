@@ -15,9 +15,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Register the location for handlebars partials here:
 
 hbs.registerPartials(__dirname + '/views/partials');
-app.use(express.static('public'));
+app.use(express.static('/public'));
 
 // Add the route handlers here:
+
+app.get('/beers', (request, response) => {
+  punkAPI
+    .getBeers()
+    .then(beersFromApi => {
+      console.log('Beers from the database: ', beersFromApi[0]);
+      response.render('beers', {
+        beersFromApi,
+        pageTitle: beersFromApi.name
+      });
+    })
+
+    .catch(error => console.log(error));
+});
+
+app.get('/random-beer', (request, response) => {
+  punkAPI
+    .getRandom()
+    .then(randomBeerFromApi => {
+      console.log('Random Beer from the database: ', randomBeerFromApi);
+      response.render('random-beer', {
+        randomBeerFromApi : randomBeerFromApi[0]
+      });
+    })
+
+    .catch(error => console.log(error));
+});
 
 app.get('/:route', (request, response) => {
   const name = request.params.route;
@@ -25,11 +52,8 @@ app.get('/:route', (request, response) => {
     case 'home':
       response.render('index', { message: 'home' });
       break;
-    case 'beers':
-      response.render('index', { message: 'beers' });
-      break;
-    case 'random-beer':
-      response.render('index', { message: 'random' });
+    case '/':
+      response.render('index', { message: '/' });
       break;
     default:
       response.render('index', { message: `default ${name}` });
